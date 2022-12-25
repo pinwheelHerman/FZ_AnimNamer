@@ -14,19 +14,16 @@ void addPathToFiles();
 int printAndConfirm();
 void renameFiles();
 char* copyString();
+void fileWriter();
 
 char fileStart[20] = "frame_";
 char fileEnd[] = ".txt";
-int maxFileNameLength = 20;
-int maxNumberOfFiles = 300;
+char path[PATH_MAX + 1];
 char *fileNames[PATH_MAX + 1];
 char *fileNamesWithPath[PATH_MAX + 1];
-char* newFileNamesWithPath[PATH_MAX + 1];
-char buf[PATH_MAX + 1];
+char *newFileNamesWithPath[PATH_MAX + 1];
 char currentFile = 0;
 char fileNumberAsString[3];
-char path[PATH_MAX + 1];
-char curFileName[PATH_MAX + 1];
 
 int main()
 {
@@ -37,9 +34,11 @@ int main()
     findFiles(path);
     sortFiles();
     addPathToFiles();
-    int proceed = printAndConfirm();
+    int proceed = printAndConfirm(); // can get rid of proceed variable
     if (proceed)
         renameFiles();
+
+    fileWriter();
 
     return 0;
 }
@@ -56,7 +55,7 @@ void findFiles(const char *path)
 
     while ((dp = readdir(dir)) != NULL)
     {
-        if (strstr(dp->d_name, "txt") != NULL)
+        if (strstr(dp->d_name, fileEnd) != NULL)
         {
             fileNames[currentFile] = dp->d_name;
             currentFile++;
@@ -72,9 +71,13 @@ void sortFiles()
     // Sorts files alphabetically
     char *tmp;
     int i = 0, j;
-    for(i; fileNames[i]; i++) {
-        for(j = 0; fileNames[j]; j++) {
-            if(strcmp(fileNames[i], fileNames[j]) < 0) {
+    
+    for(i; fileNames[i]; i++) 
+    {
+        for(j = 0; fileNames[j]; j++) 
+        {
+            if(strcmp(fileNames[i], fileNames[j]) < 0) 
+            {
                 tmp = fileNames[i];
                 fileNames[i] = fileNames[j];
                 fileNames[j] = tmp;
@@ -160,4 +163,45 @@ void renameFiles()
             fileStart[6] = '\0';
         }
     }
+}
+
+void fileWriter()
+{
+    char framesAsString[6];
+    char *metaFileName;
+
+    char data[PATH_MAX + 1] = "Filetype: Flipper Animation\nVersion: 1\n\nWidth: 128\nHeight: 64\nPassive frames: ";
+    char file2[] = "\nActive frames: 0\nFrames order: ";
+    char file3[] = "\nActive cycles: 0\nFrame rate: 6\nDuration: 3600\nActive cooldown: 0\n\nBubble slots: 0";
+
+    sprintf(framesAsString, "%d", currentFile);
+
+    strcat(data, framesAsString);
+    strcat(data, file2);
+
+    for (int i = 0; i < currentFile; i ++)
+    {
+        sprintf(framesAsString, "%d ", i);
+        strcat(data, framesAsString);
+    }
+
+    strcat(data, file3);
+
+    metaFileName = copyString();
+    strcat(metaFileName, "meta.txt");
+
+    FILE *fPtr;
+
+    fPtr = fopen(metaFileName, "w");
+
+    if (fPtr == NULL)
+    {
+        printf("Unable to create file.\n");
+        exit(EXIT_FAILURE);
+    }
+
+    fputs(data, fPtr);
+    fclose(fPtr);
+
+    printf("File created and saved successfully. :) \n");
 }
