@@ -17,12 +17,12 @@ char* copyString();
 void fileWriter();
 
 char fileStart[20] = "frame_";
-char fileEnd[] = ".txt";
+char fileEnd[] = ".png";
 char path[PATH_MAX + 1];
 char *fileNames[PATH_MAX + 1];
 char *fileNamesWithPath[PATH_MAX + 1];
 char *newFileNamesWithPath[PATH_MAX + 1];
-char currentFile = 0;
+int currentFile = 0;
 char fileNumberAsString[3];
 
 int main()
